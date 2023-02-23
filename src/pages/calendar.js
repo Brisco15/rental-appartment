@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
+import { isDaySelectable } from 'lib/dates'
 
 export default function Calendar() {
   return (
@@ -47,7 +48,19 @@ export default function Calendar() {
             </p>
 
             <div className='pt-6 flex justify-center availability-calendar'>
-                <DayPicker />
+                <DayPicker
+                  components={{
+                    DayContent: (props)=> (
+                        <div 
+                         className={`relative text-right ${
+                            !isDaySelectable(props.date) && "text-gray-500"
+                         }`}
+                        >
+                            {props.date.getDate()}
+                        </div>
+                    ),
+                  }}
+                />
             </div>
         </div>
       </div>
