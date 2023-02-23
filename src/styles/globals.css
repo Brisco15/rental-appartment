@@ -17,4 +17,7 @@ body {
   color: white;
 }
 
+.rdp-day {
+  border-radius: 0 !important;
+}
 
