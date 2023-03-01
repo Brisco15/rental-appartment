@@ -2,18 +2,26 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
-import { isDaySelectable, addDayToRange, getDatesBetweenDates } from 'lib/dates'
+import { isDaySelectable, addDayToRange, getDatesBetweenDates, getBlockedDates } from 'lib/dates'
 import { getCost } from 'lib/cost'
 import { useState } from 'react'
+import { getBookedDates } from 'lib/bookings'
+const yesterday = new Date()
+yesterday.setDate(yesterday.getDate() - 1)
 
+const sixMonthsFromNow = new Date()
+sixMonthsFromNow.setDate(sixMonthsFromNow.getDate() + 30 * 6)
 export default function Calendar() {
     const [from, setFrom] = useState()
     const [to, setTo] = useState()
+    
     const handleDayClick = (day) => {
         const range = addDayToRange(day, {
             from,
             to,
         })
+
+
         //check if the initial date is selectable
         if (!range.to) {
             if (!isDaySelectable(range.from)) {
@@ -90,6 +98,9 @@ export default function Calendar() {
 
             <div className='pt-6 flex justify-center availability-calendar'>
                 <DayPicker
+                  
+                  
+                  
                   components={{
                     DayContent: (props)=> (
                         <div 
@@ -115,7 +126,18 @@ export default function Calendar() {
                   mode = "range"
                   selected={[from, { from, to }]}
                   onDayClick={handleDayClick}
-                  
+                  disabled= {[
+                    ...getBlockedDates(),
+                    ...getBookedDates(),
+                    {
+                      from: new Date('0000'),
+                      to: yesterday,
+                    },
+                    {
+                      from: sixMonthsFromNow,
+                      to: new Date('4000'),
+                    },
+                  ]}
 
                 />
             </div>
