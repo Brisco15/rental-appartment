@@ -13,9 +13,11 @@
     "@prisma/client": "^4.10.1",
     "date-fns": "^2.29.3",
     "next": "13.1.6",
+    "raw-body": "^2.5.2",
     "react": "18.2.0",
     "react-day-picker": "^8.6.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "stripe": "^11.12.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
