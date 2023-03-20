@@ -6,12 +6,15 @@ import { isDaySelectable, addDayToRange, getDatesBetweenDates, getBlockedDates, 
 import { getCost, calcTotalCostOfStay } from 'lib/cost'
 import { useState } from 'react'
 import { getBookedDates } from 'lib/bookings'
+import prisma from 'lib/prisma'
 const yesterday = new Date()
 yesterday.setDate(yesterday.getDate() - 1)
 
 const sixMonthsFromNow = new Date()
 sixMonthsFromNow.setDate(sixMonthsFromNow.getDate() + 30 * 6)
-export default function Calendar() {
+
+
+export default function Calendar({ bookedDates }) {
     const [from, setFrom] = useState()
     const [to, setTo] = useState()
     const [numberOfNights, setNumbersOfNights] = useState(0)
@@ -26,7 +29,7 @@ export default function Calendar() {
 
         //check if the initial date is selectable
         if (!range.to) {
-            if (!isDaySelectable(range.from)) {
+            if (!isDaySelectable(range.from, bookedDates)) {
                 alert('This date cannot be selected')
                 return
             }
@@ -35,7 +38,7 @@ export default function Calendar() {
 
         //check if the end date is selectable
         if (range.to && range.from) {
-            if (!isDaySelectable(range.to)) {
+            if (!isDaySelectable(range.to, bookedDates)) {
                 alert('The end date cannot be selected')
                 return
             }
@@ -45,7 +48,7 @@ export default function Calendar() {
         const daysInBetween = getDatesBetweenDates(range.from, range.to)
 
         for (const dayInBetween of daysInBetween) {
-          if (!isDaySelectable(dayInBetween)) {
+          if (!isDaySelectable(dayInBetween, bookedDates)) {
             alert('Some days between those 2 dates cannot be selected')
             return
           }
@@ -157,20 +160,18 @@ export default function Calendar() {
 
             <div className='pt-6 flex justify-center availability-calendar'>
                 <DayPicker
-                  
-                  
-                  
+                   
                   components={{
                     DayContent: (props)=> (
                         <div 
                          className={`relative text-right ${
-                            !isDaySelectable(props.date) && "text-gray-500"
+                            !isDaySelectable(props.date, bookedDates) && "text-gray-500"
                          }`}
                         >
                             <div>
                               {props.date.getDate()}
                             </div>
-                            {isDaySelectable(props.date) && (
+                            {isDaySelectable(props.date, bookedDates) && (
                                 <div className='-mt-2'>
                                     <span
                                       className={`bg-white text-black rounded-md font-bold px-1 text-xs`} 
@@ -187,7 +188,7 @@ export default function Calendar() {
                   onDayClick={handleDayClick}
                   disabled= {[
                     ...getBlockedDates(),
-                    ...getBookedDates(),
+                    ...bookedDates,
                     {
                       from: new Date('0000'),
                       to: yesterday,
@@ -204,4 +205,15 @@ export default function Calendar() {
       </div>
     </div>
   )
+}
+
+export async function getServerSideProps() {
+  let bookedDates = await getBookedDates(prisma)
+  bookedDates = JSON.parse(JSON.stringify(bookedDates))
+
+  return {
+    props: {
+      bookedDates,
+    },
+  }
 }
